@@ -7,20 +7,20 @@ export const GridView: React.FC = () => {
   const [tree, setTree] = useState<NetworkTree | null>(null);
   const [selectedFeederCode, setSelectedFeederCode] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchTree();
-    const interval = setInterval(fetchTree, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchTree = async () => {
+  const fetchTree = React.useCallback(async () => {
     try {
       const res = await api.getNetworkTree();
       setTree(res);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchTree();
+    const interval = setInterval(fetchTree, 3000);
+    return () => clearInterval(interval);
+  }, [fetchTree]);
 
   if (!tree || !tree.substation) return null;
 

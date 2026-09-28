@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "GridSmart — Rural Feeder Decision Support & Load Management System",
   "scripts": {
-    "dev:backend": "cd backend && uvicorn app.main:app --reload --port 8000",
+    "start": "./start.sh",
+    "dev": "./start.sh",
+    "dev:backend": "cd backend && ./run.sh",
     "dev:frontend": "cd frontend && npm run dev",
-    "build:frontend": "cd frontend && npm run build"
+    "build": "cd frontend && npm run build"
   },
   "keywords": [
     "grid",

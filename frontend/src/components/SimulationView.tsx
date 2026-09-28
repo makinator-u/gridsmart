@@ -11,30 +11,21 @@ interface SimulationViewProps {
 }
 
 export const SimulationView: React.FC<SimulationViewProps> = ({ status, feeders: propFeeders, onControl, onInjectEvent }) => {
-  const [internalFeeders, setInternalFeeders] = useState<FeederItem[]>(propFeeders || []);
+  const [fallbackFeeders, setFallbackFeeders] = useState<FeederItem[]>([]);
   const [selectedFeeder, setSelectedFeeder] = useState<string>('');
   const [magnitude, setMagnitude] = useState<number>(1.5);
   const [injectedNotice, setInjectedNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (propFeeders && propFeeders.length > 0) {
-      setInternalFeeders(propFeeders);
-      if (!selectedFeeder) {
-        setSelectedFeeder(propFeeders[0].feeder_id);
-      }
-    } else {
-      api.getFeeders().then((fList) => {
-        setInternalFeeders(fList);
-        if (fList.length > 0 && !selectedFeeder) {
-          setSelectedFeeder(fList[0].feeder_id);
-        }
-      }).catch(console.error);
+    if (!propFeeders || propFeeders.length === 0) {
+      api.getFeeders().then(setFallbackFeeders).catch(console.error);
     }
   }, [propFeeders]);
 
   if (!status) return null;
 
-  const currentFeeder = selectedFeeder || (internalFeeders[0]?.feeder_id || 'F01');
+  const availableFeeders = propFeeders && propFeeders.length > 0 ? propFeeders : fallbackFeeders;
+  const currentFeeder = selectedFeeder || availableFeeders[0]?.feeder_id || '';
 
   const handleInject = (eventType: string) => {
     onInjectEvent(eventType, currentFeeder, magnitude);
@@ -149,7 +140,7 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ status, feeders:
                 onChange={(e) => setSelectedFeeder(e.target.value)}
                 className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-emerald-400 font-bold outline-none"
               >
-                {internalFeeders.map((f) => (
+                {availableFeeders.map((f) => (
                   <option key={f.id || f.feeder_id} value={f.feeder_id}>
                     {f.feeder_id} - {f.feeder_name || f.feeder_id} ({f.current_load_mw} MW)
                   </option>

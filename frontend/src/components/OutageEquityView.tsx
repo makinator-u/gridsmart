@@ -6,18 +6,18 @@ import { api } from '../api/client';
 export const OutageEquityView: React.FC = () => {
   const [data, setData] = useState<OutageBalance | null>(null);
 
-  useEffect(() => {
-    fetchOutages();
-  }, []);
-
-  const fetchOutages = async () => {
+  const fetchOutages = React.useCallback(async () => {
     try {
       const res = await api.getOutages();
       setData(res);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchOutages();
+  }, [fetchOutages]);
 
   if (!data) return null;
 

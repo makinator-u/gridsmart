@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { DashboardView } from './components/DashboardView';
 import { DataSetupView } from './components/DataSetupView';
@@ -12,122 +12,29 @@ import { ScenariosView } from './components/ScenariosView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { EventHistoryView } from './components/EventHistoryView';
 import { ArchitectureView } from './components/ArchitectureView';
-import { api } from './api/client';
-import type { GridStatus, FeederItem, GridAlert, OptimizationRun, OutageBalance } from './types';
+import { useGridTelemetry } from './hooks/useGridTelemetry';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
-  const [status, setStatus] = useState<GridStatus | null>(null);
-  const [feeders, setFeeders] = useState<FeederItem[]>([]);
-  const [alerts, setAlerts] = useState<GridAlert[]>([]);
-  const [recommendations, setRecommendations] = useState<OptimizationRun | null>(null);
-  const [outages, setOutages] = useState<OutageBalance | null>(null);
+  const {
+    status,
+    feeders,
+    alerts,
+    recommendations,
+    outages,
+    refreshAll,
+    controlSimulation,
+    loadDemoGrid,
+    runOptimization,
+    approvePlan,
+    rejectPlan,
+    injectEvent,
+    runScenario,
+  } = useGridTelemetry(2500);
 
-  useEffect(() => {
-    fetchAllData();
-    const interval = setInterval(fetchLiveTelemetry, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Full refresh (on load or after actions)
-  const fetchAllData = async () => {
-    try {
-      const [st, fList, alRes, recRes, outRes] = await Promise.all([
-        api.getGridStatus(),
-        api.getFeeders(),
-        api.getAlerts(),
-        api.getRecommendations(),
-        api.getOutages(),
-      ]);
-      setStatus(st);
-      setFeeders(fList);
-      setAlerts(alRes.alerts || []);
-      setRecommendations(recRes);
-      setOutages(outRes);
-    } catch (err) {
-      console.error('Error fetching grid state:', err);
-    }
-  };
-
-  // Lightweight 2.5s telemetry poll (prevents DB lock contention)
-  const fetchLiveTelemetry = async () => {
-    try {
-      const [st, fList, alRes] = await Promise.all([
-        api.getGridStatus(),
-        api.getFeeders(),
-        api.getAlerts(),
-      ]);
-      setStatus(st);
-      setFeeders(fList);
-      setAlerts(alRes.alerts || []);
-    } catch (err) {
-      console.error('Error polling telemetry:', err);
-    }
-  };
-
-  const handleControlSimulation = async (action: 'start' | 'pause' | 'reset', speed?: number) => {
-    try {
-      await api.controlSimulation(action, speed);
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleLoadDemo = async () => {
-    try {
-      await api.loadDemoGrid();
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRunOptimization = async () => {
-    try {
-      const run = await api.runOptimization("Operator triggered MILP optimization");
-      setRecommendations(run);
-      setActiveTab('optimization');
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleApprovePlan = async (optId: number) => {
-    try {
-      await api.approvePlan(optId);
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRejectPlan = async (optId: number) => {
-    try {
-      await api.rejectPlan(optId);
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleInjectEvent = async (eventType: string, feederCode?: string, magnitudeMw?: number) => {
-    try {
-      await api.injectEvent(eventType, feederCode, magnitudeMw);
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRunScenario = async (scenarioName: string) => {
-    try {
-      await api.runScenario(scenarioName);
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-    }
+  const handleOptimization = async () => {
+    await runOptimization('Operator triggered MILP optimization');
+    setActiveTab('optimization');
   };
 
   return (
@@ -136,8 +43,8 @@ export const App: React.FC = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         status={status}
-        onControlSimulation={handleControlSimulation}
-        onLoadDemo={handleLoadDemo}
+        onControlSimulation={controlSimulation}
+        onLoadDemo={loadDemoGrid}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
@@ -149,18 +56,18 @@ export const App: React.FC = () => {
             recommendations={recommendations}
             outages={outages}
             onNavigate={(tab) => setActiveTab(tab)}
-            onRunOptimization={handleRunOptimization}
-            onInjectEvent={handleInjectEvent}
+            onRunOptimization={handleOptimization}
+            onInjectEvent={injectEvent}
           />
         )}
 
         {activeTab === 'setup' && (
           <DataSetupView
             onGridCreated={() => {
-              fetchAllData();
+              refreshAll();
               setActiveTab('dashboard');
             }}
-            onLoadDemo={handleLoadDemo}
+            onLoadDemo={loadDemoGrid}
           />
         )}
 
@@ -172,21 +79,21 @@ export const App: React.FC = () => {
           <SimulationView
             status={status}
             feeders={feeders}
-            onControl={handleControlSimulation}
-            onInjectEvent={handleInjectEvent}
+            onControl={controlSimulation}
+            onInjectEvent={injectEvent}
           />
         )}
 
         {activeTab === 'alerts' && (
-          <AlertsView alerts={alerts} onRunOptimization={handleRunOptimization} />
+          <AlertsView alerts={alerts} onRunOptimization={handleOptimization} />
         )}
 
         {activeTab === 'optimization' && (
           <OptimizationView
             recommendations={recommendations}
-            onRunOptimization={handleRunOptimization}
-            onApprove={handleApprovePlan}
-            onReject={handleRejectPlan}
+            onRunOptimization={handleOptimization}
+            onApprove={approvePlan}
+            onReject={rejectPlan}
           />
         )}
 
@@ -195,7 +102,7 @@ export const App: React.FC = () => {
         {activeTab === 'scenarios' && (
           <ScenariosView
             activeScenarioName={status?.active_scenario || 'Normal'}
-            onScenarioRun={handleRunScenario}
+            onScenarioRun={runScenario}
           />
         )}
 
@@ -209,7 +116,9 @@ export const App: React.FC = () => {
       <footer className="border-t border-slate-900 bg-slate-950 py-4 px-6 text-center text-xs text-slate-500">
         <p>
           GridSmart — Rural Feeder Decision Support & Load Management System.
-          <span className="text-emerald-400 font-mono ml-1.5 font-semibold">Data Source: {status?.data_source || 'Demo Simulation'}</span>
+          <span className="text-emerald-400 font-mono ml-1.5 font-semibold">
+            Data Source: {status?.data_source || 'Demo Simulation'}
+          </span>
         </p>
       </footer>
     </div>
@@ -217,4 +126,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-

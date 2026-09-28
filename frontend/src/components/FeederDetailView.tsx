@@ -8,17 +8,7 @@ export const FeederDetailView: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string>('');
   const [detail, setDetail] = useState<any>(null);
 
-  useEffect(() => {
-    loadFeeders();
-  }, []);
-
-  useEffect(() => {
-    if (selectedId) {
-      loadDetail(selectedId);
-    }
-  }, [selectedId]);
-
-  const loadFeeders = async () => {
+  const loadFeeders = React.useCallback(async () => {
     try {
       const data = await api.getFeeders();
       setFeeders(data);
@@ -28,16 +18,26 @@ export const FeederDetailView: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
-  const loadDetail = async (id: string) => {
+  const loadDetail = React.useCallback(async (id: string) => {
     try {
       const data = await api.getFeederDetail(id);
       setDetail(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadFeeders();
+  }, [loadFeeders]);
+
+  useEffect(() => {
+    if (selectedId) {
+      loadDetail(selectedId);
+    }
+  }, [selectedId, loadDetail]);
 
   if (!detail) return null;
 

@@ -18,18 +18,18 @@ const COLORS = ['#10b981', '#06b6d4', '#f59e0b', '#6366f1', '#f43f5e', '#8b5cf6'
 export const AnalyticsView: React.FC = () => {
   const [data, setData] = useState<any>(null);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = React.useCallback(async () => {
     try {
       const res = await api.getAnalytics();
       setData(res);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   if (!data) return null;
 

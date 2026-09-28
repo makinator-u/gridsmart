@@ -12,18 +12,18 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({ activeScenarioName
   const [scenarios, setScenarios] = useState<ScenarioItem[]>([]);
   const [selectedNotice, setSelectedNotice] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchScenarios();
-  }, []);
-
-  const fetchScenarios = async () => {
+  const fetchScenarios = React.useCallback(async () => {
     try {
       const data = await api.getScenarios();
       setScenarios(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchScenarios();
+  }, [fetchScenarios]);
 
   const handleActivate = async (name: string) => {
     onScenarioRun(name);

@@ -8,20 +8,20 @@ export const EventHistoryView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('ALL');
 
-  useEffect(() => {
-    fetchEvents();
-    const interval = setInterval(fetchEvents, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchEvents = async () => {
+  const fetchEvents = React.useCallback(async () => {
     try {
       const data = await api.getEvents(100);
       setEvents(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+    const interval = setInterval(fetchEvents, 4000);
+    return () => clearInterval(interval);
+  }, [fetchEvents]);
 
   const filtered = events.filter((e) => {
     const matchesSearch = e.description.toLowerCase().includes(searchTerm.toLowerCase()) || e.event_type.toLowerCase().includes(searchTerm.toLowerCase());
