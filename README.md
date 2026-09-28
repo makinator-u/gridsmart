@@ -1,5 +1,7 @@
 # GridSmart — Rural Feeder Decision Support & Load Management System
 
+> 📖 **Comprehensive Project Documentation & Mathematical Guide:** See [PROJECT_EXPLANATION.md](PROJECT_EXPLANATION.md) for full architectural diagrams, MILP formulations, ML anomaly detection models, and pointer-by-pointer breakdown.
+
 **GridSmart** is a full-stack distribution-grid operator decision support system designed for rural electricity networks. It empowers control room operators to monitor feeder health, detect overloads and power shortages, identify statistical load anomalies using AI, and generate safe, fair load management plans using Mixed-Integer Linear Programming (MILP).
 
 > **Architectural Note:**
