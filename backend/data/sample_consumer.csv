@@ -1,0 +1,10 @@
+consumer_id,feeder_id,consumer_type,power_mw,priority,flexibility
+C101,F01,Residential,1.2,3,15
+C102,F01,Agriculture,1.1,4,40
+C103,F01,Commercial,0.3,4,25
+C104,F01,Hospital,0.2,1,0
+C201,F02,Agriculture,2.1,4,50
+C202,F02,Residential,0.9,3,15
+C203,F02,Water Supply,0.3,1,0
+C301,F03,Industrial,1.8,3,30
+C302,F03,Hospital,0.4,1,0

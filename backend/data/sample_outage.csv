@@ -1,0 +1,4 @@
+feeder_id,consumer_group,start_time,end_time,reason
+F01,Agriculture,2026-09-27 10:00:00,2026-09-27 11:30:00,Scheduled Load Management
+F02,Agriculture,2026-09-27 12:00:00,2026-09-27 13:15:00,Feeder Overload Shedding
+F05,Commercial,2026-09-27 09:15:00,2026-09-27 10:00:00,Transformer Maintenance

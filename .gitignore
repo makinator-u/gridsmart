@@ -1,0 +1,26 @@
+# Node & Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+node_modules/
+dist/
+
+# Python & Backend
+backend/.venv/
+backend/venv/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+*.sqlite3
+backend/*.db
+
+# Logs & Environment
+*.log
+.env
+backend/.env
+.DS_Store
+.idea/
+.vscode/

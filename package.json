@@ -1,0 +1,20 @@
+{
+  "name": "gridsmart-load-management",
+  "version": "1.0.0",
+  "description": "GridSmart — Rural Feeder Decision Support & Load Management System",
+  "scripts": {
+    "dev:backend": "cd backend && uvicorn app.main:app --reload --port 8000",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "grid",
+    "load-shedding",
+    "decision-support",
+    "fastapi",
+    "react",
+    "milp"
+  ],
+  "author": "",
+  "license": "ISC"
+}
