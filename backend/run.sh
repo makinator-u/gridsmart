@@ -24,7 +24,16 @@ echo "🔄  Installing dependencies from requirements.txt..."
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
 
-# 4. Start Uvicorn
+# 4. Free port 8000 if already in use
+PORT=8000
+EXISTING_PID=$(lsof -ti tcp:$PORT 2>/dev/null || true)
+if [ -n "$EXISTING_PID" ]; then
+  echo "⚠️   Port $PORT in use (PID $EXISTING_PID) — stopping it first..."
+  kill -9 "$EXISTING_PID" 2>/dev/null || true
+  sleep 1
+fi
+
+# 5. Start Uvicorn
 echo ""
 echo "✅  Backend running at → http://127.0.0.1:8000"
 echo "📄  API docs          → http://127.0.0.1:8000/docs"
