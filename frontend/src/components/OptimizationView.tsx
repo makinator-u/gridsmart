@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Brain, CheckCircle2, XCircle, Clock, ShieldCheck } from 'lucide-react';
+import { Brain, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
 import type { OptimizationRun } from '../types';
+import { RecommendedActionsTable } from './optimization/RecommendedActionsTable';
+import { OperationalTimelineGantt } from './optimization/OperationalTimelineGantt';
 
 interface OptimizationViewProps {
   recommendations: OptimizationRun | null;
@@ -42,7 +44,7 @@ export const OptimizationView: React.FC<OptimizationViewProps> = ({
           </div>
           <h2 className="text-xl font-bold text-white mt-1">Operator Decision Support & Load Management Plan</h2>
           <p className="text-xs text-slate-400">
-            Formulates linear decision constraints to eliminate power shortage while protecting critical loads and maintaining village equity.
+            Formulates linear decision constraints to eliminate power shortages while protecting critical loads and maintaining village equity.
           </p>
         </div>
 
@@ -65,7 +67,7 @@ export const OptimizationView: React.FC<OptimizationViewProps> = ({
       {recommendations ? (
         <div className="space-y-6">
           {/* Optimization Run Overview Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
               <div>
                 <div className="flex items-center gap-2 font-mono text-xs text-slate-400">
@@ -133,89 +135,15 @@ export const OptimizationView: React.FC<OptimizationViewProps> = ({
               </div>
             </div>
 
-            {/* Recommended Action Plan Table */}
+            {/* Recommended Action Plan Table Component */}
             <div className="space-y-3 pt-2">
               <h4 className="text-xs font-bold text-white">Recommended Action Plan Breakdown</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
-                    <tr>
-                      <th className="p-2.5">Feeder</th>
-                      <th className="p-2.5">Consumer Group</th>
-                      <th className="p-2.5">Recommended Action</th>
-                      <th className="p-2.5">Target MW</th>
-                      <th className="p-2.5">Duration</th>
-                      <th className="p-2.5">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/50">
-                    {recommendations.recommended_actions.map((a) => (
-                      <tr key={a.id} className="hover:bg-slate-800/30">
-                        <td className="p-2.5 font-bold text-emerald-400">{a.feeder_code}</td>
-                        <td className="p-2.5 text-white font-medium">{a.consumer_group_name}</td>
-                        <td className="p-2.5">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              a.action === 'REDUCE'
-                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                : a.action === 'SHIFT'
-                                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                            }`}
-                          >
-                            {a.action}
-                          </span>
-                        </td>
-                        <td className="p-2.5 font-bold text-white">{a.load_mw > 0 ? `-${a.load_mw} MW` : '0.0 MW (Full Power)'}</td>
-                        <td className="p-2.5 text-slate-400">{a.duration_mins} mins</td>
-                        <td className="p-2.5 font-bold text-slate-400">{a.status}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <RecommendedActionsTable actions={recommendations.recommended_actions} />
             </div>
           </div>
 
-          {/* Operational Timeline (Section 19) */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-              <Clock className="w-4 h-4 text-cyan-400" />
-              <span>Operational Action Timeline (14:00 – 18:00)</span>
-            </h3>
-
-            <div className="space-y-4 font-mono text-xs">
-              {['F01', 'F02', 'F03', 'F04', 'F05', 'F06'].map((code) => {
-                const action = recommendations.recommended_actions.find((a) => a.feeder_code === code && a.load_mw > 0);
-                return (
-                  <div key={code} className="space-y-1">
-                    <div className="flex justify-between text-slate-300 font-bold">
-                      <span>Feeder {code}</span>
-                      <span className="text-[11px] font-normal text-slate-400">
-                        {action ? `${action.action} ${action.load_mw} MW` : 'NORMAL OPERATION'}
-                      </span>
-                    </div>
-
-                    <div className="h-6 w-full bg-slate-950 rounded-lg border border-slate-800 overflow-hidden flex items-center p-1 text-[10px]">
-                      <div className="h-full bg-emerald-500/60 rounded text-slate-950 font-bold px-2 flex items-center" style={{ width: action ? '45%' : '100%' }}>
-                        NORMAL
-                      </div>
-                      {action && (
-                        <>
-                          <div className="h-full bg-amber-500/80 rounded text-slate-950 font-bold px-2 flex items-center ml-1" style={{ width: '30%' }}>
-                            {action.action}
-                          </div>
-                          <div className="h-full bg-cyan-500/60 rounded text-slate-950 font-bold px-2 flex items-center ml-1" style={{ width: '25%' }}>
-                            RESTORE
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {/* Operational Timeline Component */}
+          <OperationalTimelineGantt actions={recommendations.recommended_actions} />
         </div>
       ) : (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-4">

@@ -152,46 +152,8 @@ def get_outage_fairness(db: Session = Depends(get_db)):
         ]
     }
 
+from app.services.analytics_service import analytics_service
+
 @router.get("/analytics")
 def get_analytics(db: Session = Depends(get_db)):
-    feeders = db.query(Feeder).all()
-    cgroups = db.query(ConsumerGroup).all()
-    events = db.query(GridEvent).all()
-    villages = db.query(Village).all()
-
-    # Load distribution by category
-    categories = {}
-    for cg in cgroups:
-        cat = cg.consumer_type
-        categories[cat] = round(categories.get(cat, 0.0) + cg.power_mw, 2)
-
-    # Feeder loading percentages
-    feeder_loads = [
-        {
-            "code": f.feeder_id,
-            "name": f.feeder_name,
-            "capacity_mw": f.capacity_mw,
-            "load_mw": f.current_load_mw,
-            "loading_pct": round((f.current_load_mw / max(0.1, f.capacity_mw)) * 100, 1)
-        } for f in feeders
-    ]
-
-    # Outage breakdown per village
-    outage_data = [
-        {
-            "name": v.name,
-            "outage_hours": round(v.outage_hours_today, 1)
-        } for v in villages
-    ]
-
-    # Event count distribution
-    event_counts = {}
-    for e in events:
-        event_counts[e.event_type] = event_counts.get(e.event_type, 0) + 1
-
-    return {
-        "load_by_category": categories,
-        "feeder_loading": feeder_loads,
-        "outage_distribution": outage_data,
-        "event_summary": event_counts
-    }
+    return analytics_service.get_grid_analytics(db)
